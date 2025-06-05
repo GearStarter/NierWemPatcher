@@ -1,4 +1,5 @@
 # NierWemPatcher
+**[EN](https://github.com/GearStarter/NierWemPatcher/blob/main/README.md) | [RU](https://github.com/GearStarter/NierWemPatcher/blob/main/README-RU.md)**
 
 A tool for patching .wem audio files before packing them into .wsp archives for the game NieR: Automata.
 

@@ -1,4 +1,5 @@
 # NierWemPatcher
+**[EN](https://github.com/GearStarter/NierWemPatcher/blob/main/README.md) | [RU](https://github.com/GearStarter/NierWemPatcher/blob/main/README-RU.md)**
 
 Инструмент для патчинга аудиофайлов формата .wem перед их упаковкой в архивы .wsp для игры NieR: Automata.
 
