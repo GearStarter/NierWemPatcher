@@ -5,7 +5,7 @@ A tool for patching .wem audio files before packing them into .wsp archives for 
 
 ## Overview
 
-The primary tool for working with the game's audio files is **NieR-Audio-Tools**.
+The primary tool for working with the game's audio files is **[NieR-Audio-Tools](https://github.com/NSACloud/NieR-Audio-Tools)**.
 
 Direct replacement of .wem files causes the game to crash. Through detailed analysis, including byte-by-byte comparison in a hex editor with the assistance of **Grok**, the following was determined:
 
