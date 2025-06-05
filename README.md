@@ -1,54 +1,54 @@
 # NierWemPatcher
 
-Инструмент для патчинга аудиофайлов формата .wem перед их упаковкой в архивы .wsp для игры NieR: Automata.
+A tool for patching .wem audio files before packing them into .wsp archives for the game NieR: Automata.
 
-## Общие сведения
+## Overview
 
-Основной инструмент для работы с аудиофайлами игры — NieR-Audio-Tools.
+The primary tool for working with the game's audio files is **NieR-Audio-Tools**.
 
-Прямая замена файлов .wem приводит к сбоям в работе игры. В результате тщательного анализа, включая побайтовое сравнение в шестнадцатеричном редакторе с использованием **Grok**, были выявлено следующее:
+Direct replacement of .wem files causes the game to crash. Through detailed analysis, including byte-by-byte comparison in a hex editor with the assistance of **Grok**, the following was determined:
 
-### Основные выводы
+### Key Findings
 
-1. **Значения байтов на позициях 0x28 и 0x29**:
-   - После обработки в Wwise файлы .wem имеют значения `0x28 = 01`, `0x29 = 41`.
-   - В оригинальных файлах .wem значения составляют `0x28 = 04`, `0x29 = 00`.
-2. **Дополнение в оригинальных файлах**:
-   - Оригинальные файлы .wem содержат в конце несколько последовательностей байтов `00 00`, отсутствующих в файлах, обработанных Wwise.
+1. **Byte Values at Positions 0x28 and 0x29**:
+   - After processing in Wwise, .wem files have values `0x28 = 01`, `0x29 = 41`.
+   - In original .wem files, the values are `0x28 = 04`, `0x29 = 00`.
+2. **Padding in Original Files**:
+   - Original .wem files contain several `00 00` byte sequences at the end, which are absent in Wwise-processed files.
 
-### Требования для успешного патчинга
+### Requirements for Successful Patching
 
-Для обеспечения совместимости с NieR: Automata патченные файлы .wem должны соответствовать следующим условиям:
+To ensure compatibility with NieR: Automata, patched .wem files must meet the following conditions:
 
-1. Общий размер нового файла .wem не должен превышать размер оригинального файла.
-2. Длина аудиоданных не должна превышать длину оригинала, что можно проверить с помощью скрипта `check_wem_audio_length.py`.
-3. Значения байтов на позициях `0x28` и `0x29` должны быть установлены в `0x28 = 04`, `0x29 = 00` с использованием скрипта `patch_wem.py`.
-4. В конец файла .wem необходимо добавить последовательности байтов `00 00`, чтобы размер файла и длина данных соответствовали оригиналу, что выполняется с помощью скрипта `patch_wem.py`.
+1. The total size of the new .wem file must not exceed the size of the original file.
+2. The audio data length must not exceed that of the original, which can be verified using the `check_wem_audio_length.py` script.
+3. Byte values at positions `0x28` and `0x29` must be set to `0x28 = 04`, `0x29 = 00` using the `patch_wem.py` script.
+4. `00 00` byte sequences must be added to the end of the .wem file to match the original file's size and data length, which is handled by the `patch_wem.py` script.
 
-## Процесс работы
+## Workflow
 
-Типичный процесс замены аудиофайлов в NieR: Automata включает следующие шаги:
+The typical process for replacing audio files in NieR: Automata includes the following steps:
 
-1. Распаковка архивов .wsp с использованием **NieR-Audio-Tools**.
-2. Конвертация оригинальных файлов .wem в формат .wav для использования в качестве ориентира и подгонки звука.
-3. Подготовка новых файлов .wav (48.0 kHz, Mono, 16 bits) для замены оригиналов.
-4. Конвертация новых файлов .wav в формат .wem с использованием **Wwise 2016** (Vorbis Quality High, 48.0 kHz, Mono, Vorbis, Quality Level 4).
-5. Патчинг файлов .wem для обеспечения совместимости с помощью предоставленных скриптов.
-6. Упаковка патченных файлов .wem в архивы .wsp с использованием **NieR-Audio-Tools**.
+1. Unpack .wsp archives using **NieR-Audio-Tools**.
+2. Convert original .wem files to .wav format for reference and audio adjustment.
+3. Prepare new .wav files (48.0 kHz, Mono, 16 bits) to replace the originals.
+4. Convert new .wav files to .wem format using **Wwise 2016** (Vorbis Quality High, 48.0 kHz, Mono, Vorbis, Quality Level 4).
+5. Patch the .wem files for compatibility using the provided scripts.
+6. Pack the patched .wem files into .wsp archives using **NieR-Audio-Tools**.
 
-## Инструкция по использованию
+## Usage Instructions
 
-1. Поместите оригинальные файлы .wem в папку `orig`.
-2. Поместите сконвертированные в Wwise файлы .wem в папку `converted`.
-3. Проверьте длину аудиоданных с помощью скрипта `check_wem_audio_length.py`. При необходимости сократите длительность или снизьте битрейт аудиофайлов.
-4. Примените патч к файлам .wem с помощью скрипта `patch_wem.py`. Готовые к упаковке файлы будут сохранены в папке `patched`.
+1. Place original .wem files in the `orig` folder.
+2. Place Wwise-converted .wem files in the `converted` folder.
+3. Verify audio data length using the `check_wem_audio_length.py` script. If necessary, shorten the duration or reduce the bitrate of the audio files.
+4. Apply the patch to .wem files using the `patch_wem.py` script. Patched files ready for packing will be saved in the `patched` folder.
 
-## Инструменты
+## Tools
 
-- `check_wem_audio_length.py`: Проверяет, что длина аудиоданных в сконвертированных файлах .wem не превышает длину оригиналов.
-- `patch_wem.py`: Выполняет необходимые изменения байтов и добавляет дополнение в конец файлов .wem для соответствия структуре оригинальных файлов.
+- `check_wem_audio_length.py`: Verifies that the audio data length in converted .wem files does not exceed that of the originals.
+- `patch_wem.py`: Applies necessary byte changes and adds padding to the end of .wem files to match the structure of the original files.
 
-## Дополнительные ресурсы
+## Additional Resources
 
 - Telegram: [ainyashaprime](https://t.me/ainyashaprime)
-- Видео с демонстрацией: [YouTube](https://youtube.com/shorts/4wRLVO6P2VY?feature=share)
+- Demonstration video: [YouTube](https://youtube.com/shorts/4wRLVO6P2VY?feature=share)
