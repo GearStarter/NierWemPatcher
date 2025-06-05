@@ -14,8 +14,10 @@
 1. **Значения байтов на позициях 0x28 и 0x29**:
    - После обработки в Wwise файлы .wem имеют значения `0x28 = 01`, `0x29 = 41`.
    - В оригинальных файлах .wem значения составляют `0x28 = 04`, `0x29 = 00`.
+![Image alt](https://github.com/GearStarter/NierWemPatcher/blob/main/assets/bytes.png)
 2. **Дополнение в оригинальных файлах**:
    - Оригинальные файлы .wem содержат в конце несколько последовательностей байтов `00 00`, отсутствующих в файлах, обработанных Wwise.
+![Image alt](https://github.com/GearStarter/NierWemPatcher/blob/main/assets/zeros.png)
 
 ### Требования для успешного патчинга
 

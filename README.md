@@ -14,8 +14,10 @@ Direct replacement of .wem files causes the game to crash. Through detailed anal
 1. **Byte Values at Positions 0x28 and 0x29**:
    - After processing in Wwise, .wem files have values `0x28 = 01`, `0x29 = 41`.
    - In original .wem files, the values are `0x28 = 04`, `0x29 = 00`.
+![Image alt](https://github.com/GearStarter/NierWemPatcher/blob/main/assets/bytes.png)
 2. **Padding in Original Files**:
    - Original .wem files contain several `00 00` byte sequences at the end, which are absent in Wwise-processed files.
+![Image alt](https://github.com/GearStarter/NierWemPatcher/blob/main/assets/zeros.png)
 
 ### Requirements for Successful Patching
 
