@@ -1,0 +1,1 @@
+The patched *.wem files for packaging in *.wsp will be located here.
