@@ -48,8 +48,9 @@ The typical process for replacing audio files in NieR: Automata includes the fol
 
 ## Tools
 
-- `check_wem_audio_length.py`: Verifies that the audio data length in converted .wem files does not exceed that of the originals.
 - `patch_wem.py`: Applies necessary byte changes and adds padding to the end of .wem files to match the structure of the original files.
+- `check_wem_audio_length.py`: Verifies that the audio data length in converted .wem files does not exceed that of the originals.
+- `check_wem_bytes.py`: This script checks .wem audio files in the orig folder (or a specified folder) for correct byte values at positions 0x28=04 and 0x29=00. It generates a report in invalid_wem_files.txt listing any files.
 
 ## Additional Resources
 
