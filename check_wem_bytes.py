@@ -25,7 +25,7 @@ def check_wem_file(file_path):
         return False, f"Error reading file: {str(e)}"
 
 def check_wem_files_in_folder(folder_path, output_txt):
-    """Checks all .wem files in the folder and writes invalid ones to txt."""
+    """Checks all .wem files in the folder and its subfolders, writes invalid ones to txt."""
     # Check if folder exists
     if not os.path.isdir(folder_path):
         print(f"Error: Folder does not exist: {folder_path}")
@@ -33,15 +33,15 @@ def check_wem_files_in_folder(folder_path, output_txt):
             f.write(f"Folder does not exist: {folder_path}\n")
         return
     
-    # Collect all .wem files
-    wem_files = glob.glob(os.path.join(folder_path, "*.wem"))
+    # Collect all .wem files recursively
+    wem_files = glob.glob(os.path.join(folder_path, "**", "*.wem"), recursive=True)
     if not wem_files:
-        print(f"No .wem files found in folder: {folder_path}")
+        print(f"No .wem files found in folder or subfolders: {folder_path}")
         with open(output_txt, 'w', encoding='utf-8') as f:
-            f.write("No .wem files found in the specified folder.\n")
+            f.write("No .wem files found in the specified folder or its subfolders.\n")
         return
     
-    print(f"Found {len(wem_files)} .wem files in folder: {folder_path}")
+    print(f"Found {len(wem_files)} .wem files in folder and subfolders: {folder_path}")
     
     # List of invalid files
     invalid_files = []
