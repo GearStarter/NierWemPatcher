@@ -1,5 +1,6 @@
 import os
 import struct
+import re
 
 def find_data_section(file_path):
     """Finds the 'data' section in a .wem file and returns its offset and size."""
@@ -107,6 +108,15 @@ def check_wem_files(orig_dir, converted_dir, output_txt):
                 print(f"  OK: Converted file is not longer")
             
             print()
+    
+    # Sort oversized files by numeric part of filename
+    def extract_number(file_path):
+        # Extract numeric part from filename (e.g., '102' from '102.wem')
+        filename = os.path.basename(file_path)
+        match = re.search(r'(\d+)', filename)
+        return int(match.group(1)) if match else float('inf')
+    
+    oversized_files.sort(key=extract_number)
     
     # Always write to txt file
     try:
