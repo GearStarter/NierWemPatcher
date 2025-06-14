@@ -56,7 +56,7 @@ def get_audio_data_length(file_path):
         return None
 
 def check_wem_files(orig_dir, converted_dir, output_txt):
-    """Checks audio data lengths and lists oversized converted .wem files."""
+    """Checks audio data lengths and lists oversized converted .wem files, including subdirectories."""
     oversized_files = []
     
     # Check if directories exist
@@ -67,43 +67,46 @@ def check_wem_files(orig_dir, converted_dir, output_txt):
         print(f"Error: Converted directory not found: {converted_dir}")
         return
     
-    print(f"Scanning directories...")
+    print(f"Scanning directories recursively...")
     print(f"Original directory: {orig_dir}")
     print(f"Converted directory: {converted_dir}")
     
-    # Process each .wem file in orig
-    for filename in os.listdir(orig_dir):
-        if not filename.lower().endswith('.wem'):
-            continue
-        
-        orig_path = os.path.join(orig_dir, filename)
-        converted_path = os.path.join(converted_dir, filename)
-        
-        # Check if converted file exists
-        if not os.path.exists(converted_path):
-            print(f"Warning: Converted file not found for {filename}")
-            continue
-        
-        # Get audio data lengths
-        orig_audio_len = get_audio_data_length(orig_path)
-        converted_audio_len = get_audio_data_length(converted_path)
-        
-        if orig_audio_len is None or converted_audio_len is None:
-            print(f"Skipping {filename} due to errors")
-            continue
-        
-        print(f"Checking {filename}:")
-        print(f"  Original audio length: {orig_audio_len} bytes")
-        print(f"  Converted audio length: {converted_audio_len} bytes")
-        
-        # Check if converted is longer
-        if converted_audio_len > orig_audio_len:
-            print(f"  Warning: Converted file is longer than original")
-            oversized_files.append(converted_path)
-        else:
-            print(f"  OK: Converted file is not longer")
-        
-        print()
+    # Process each .wem file in orig directory and subdirectories
+    for root, _, files in os.walk(orig_dir):
+        for filename in files:
+            if not filename.lower().endswith('.wem'):
+                continue
+            
+            orig_path = os.path.join(root, filename)
+            # Calculate relative path to maintain directory structure
+            rel_path = os.path.relpath(orig_path, orig_dir)
+            converted_path = os.path.join(converted_dir, rel_path)
+            
+            # Check if converted file exists
+            if not os.path.exists(converted_path):
+                print(f"Warning: Converted file not found for {rel_path}")
+                continue
+            
+            # Get audio data lengths
+            orig_audio_len = get_audio_data_length(orig_path)
+            converted_audio_len = get_audio_data_length(converted_path)
+            
+            if orig_audio_len is None or converted_audio_len is None:
+                print(f"Skipping {rel_path} due to errors")
+                continue
+            
+            print(f"Checking {rel_path}:")
+            print(f"  Original audio length: {orig_audio_len} bytes")
+            print(f"  Converted audio length: {converted_audio_len} bytes")
+            
+            # Check if converted is longer
+            if converted_audio_len > orig_audio_len:
+                print(f"  Warning: Converted file is longer than original")
+                oversized_files.append(converted_path)
+            else:
+                print(f"  OK: Converted file is not longer")
+            
+            print()
     
     # Always write to txt file
     try:
