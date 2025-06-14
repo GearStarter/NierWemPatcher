@@ -54,7 +54,7 @@ def patch_wem(orig_wem, input_wem, output_wem):
         return False
 
 def batch_patch_wem(orig_dir, converted_dir, patched_dir):
-    """Processes all .wem files in orig_dir, patching with converted_dir files."""
+    """Processes all .wem files in orig_dir, patching with converted_dir files, including subdirectories."""
     # Check if directories exist
     if not os.path.isdir(orig_dir):
         print(f"Error: Original directory not found: {orig_dir}")
@@ -72,7 +72,7 @@ def batch_patch_wem(orig_dir, converted_dir, patched_dir):
             print(f"Error: Failed to create patched directory: {str(e)}")
             return 0, 0
 
-    print(f"Starting batch patching of .wem files...")
+    print(f"Starting batch patching of .wem files recursively...")
     print(f"Original directory: {orig_dir}")
     print(f"Converted directory: {converted_dir}")
     print(f"Patched directory: {patched_dir}")
@@ -80,25 +80,39 @@ def batch_patch_wem(orig_dir, converted_dir, patched_dir):
 
     processed = 0
     failed = 0
-
-    # Process each .wem file in orig
     found_files = False
-    for filename in os.listdir(orig_dir):
-        if not filename.lower().endswith('.wem'):
-            continue
-        found_files = True
 
-        orig_path = os.path.join(orig_dir, filename)
-        converted_path = os.path.join(converted_dir, filename)
-        output_path = os.path.join(patched_dir, filename)
+    # Process each .wem file in orig directory and subdirectories
+    for root, _, files in os.walk(orig_dir):
+        for filename in files:
+            if not filename.lower().endswith('.wem'):
+                continue
+            found_files = True
 
-        print(f"Processing {filename}...")
-        success = patch_wem(orig_path, converted_path, output_path)
-        if success:
-            processed += 1
-        else:
-            failed += 1
-        print()
+            orig_path = os.path.join(root, filename)
+            # Calculate relative path to maintain directory structure
+            rel_path = os.path.relpath(orig_path, orig_dir)
+            converted_path = os.path.join(converted_dir, rel_path)
+            output_path = os.path.join(patched_dir, rel_path)
+
+            # Create output subdirectory if it doesn't exist
+            output_subdir = os.path.dirname(output_path)
+            if not os.path.isdir(output_subdir):
+                try:
+                    os.makedirs(output_subdir)
+                    print(f"Created subdirectory: {output_subdir}")
+                except Exception as e:
+                    print(f"Error: Failed to create subdirectory {output_subdir}: {str(e)}")
+                    failed += 1
+                    continue
+
+            print(f"Processing {rel_path}...")
+            success = patch_wem(orig_path, converted_path, output_path)
+            if success:
+                processed += 1
+            else:
+                failed += 1
+            print()
 
     if not found_files:
         print(f"No .wem files found in {orig_dir}")
