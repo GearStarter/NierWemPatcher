@@ -1,0 +1,3 @@
+WEM-файлы с некорректным значением на позиции 0x26 (не 0x00 или 0x18):
+stream\English(US)\vo_core_0_004\26.wem: byte 0x26 = 0x10
+stream\English(US)\vo_core_0_004\27.wem: byte 0x26 = 0x10
