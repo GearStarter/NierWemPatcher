@@ -2,7 +2,7 @@ import argparse
 import os
 
 def patch_wem(orig_wem, input_wem, output_wem):
-    """Patches input .wem file using bytes from original .wem and adds padding."""
+    """Patches input .wem file using bytes from original .wem at positions 0x26, 0x28-0x2b and adds padding."""
     try:
         # Check if input files exist
         if not os.path.exists(orig_wem):
@@ -26,9 +26,10 @@ def patch_wem(orig_wem, input_wem, output_wem):
             print(f"Error: Input file too short (size: {len(input_data)} bytes)")
             return False
 
-        # Copy bytes 0x28-0x2b from original
+        # Copy bytes 0x26, 0x28-0x2b from original
         patched_data = bytearray(input_data)
-        patched_data[0x28:0x2c] = orig_data[0x28:0x2c]
+        patched_data[0x26] = orig_data[0x26]  # Copy byte at 0x26
+        patched_data[0x28:0x2c] = orig_data[0x28:0x2c]  # Copy bytes 0x28-0x2b
 
         # Add zero padding to match original size
         orig_size = len(orig_data)
@@ -45,7 +46,7 @@ def patch_wem(orig_wem, input_wem, output_wem):
             f_output.write(patched_data)
 
         print(f"Successfully patched: {output_wem}")
-        print(f"Bytes at 0x28-0x2b: {patched_data[0x28:0x2c].hex()}")
+        print(f"Bytes at 0x26, 0x28-0x2b: {patched_data[0x26:0x2c].hex()}")
         print(f"Output size: {len(patched_data)} bytes")
         return True
 
