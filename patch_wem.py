@@ -1,8 +1,34 @@
 import argparse
 import os
+import struct
+
+# Configuration parameters
+PATCH_0x26 = True         # Copy byte at 0x26 from original WEM (e.g., 0x18 for 5.1, 0x00 for mono)
+SET_CHANNEL_MASK = True   # Copy channel mask bytes (0x28-0x2B) from original WEM; if False, skip this step
+ADD_PADDING = True        # Add zero padding to match original file size
+
+def get_channel_count(wem_data):
+    """Reads the number of channels from WEM file at position 0x16-0x17 for logging."""
+    try:
+        if len(wem_data) < 0x18:
+            return None, "File too short to read channel count"
+        channels = struct.unpack_from("<H", wem_data, 0x16)[0]
+        return channels, ""
+    except Exception as e:
+        return None, f"Error reading channel count: {str(e)}"
+
+def get_channel_mask(wem_data):
+    """Reads the channel mask from WEM file at position 0x28-0x2B for logging or patching."""
+    try:
+        if len(wem_data) < 0x2c:
+            return None, "File too short to read channel mask"
+        channel_mask = struct.unpack_from("<I", wem_data, 0x28)[0]
+        return channel_mask, ""
+    except Exception as e:
+        return None, f"Error reading channel mask: {str(e)}"
 
 def patch_wem(orig_wem, input_wem, output_wem):
-    """Patches input .wem file using bytes from original .wem at positions 0x26, 0x28-0x2b and adds padding."""
+    """Patches input .wem file using original .wem based on configuration parameters."""
     try:
         # Check if input files exist
         if not os.path.exists(orig_wem):
@@ -26,27 +52,46 @@ def patch_wem(orig_wem, input_wem, output_wem):
             print(f"Error: Input file too short (size: {len(input_data)} bytes)")
             return False
 
-        # Copy bytes 0x26, 0x28-0x2b from original
+        # Create patched data
         patched_data = bytearray(input_data)
-        patched_data[0x26] = orig_data[0x26]  # Copy byte at 0x26
-        patched_data[0x28:0x2c] = orig_data[0x28:0x2c]  # Copy bytes 0x28-0x2b
 
-        # Add zero padding to match original size
-        orig_size = len(orig_data)
-        input_size = len(patched_data)
-        if input_size < orig_size:
-            padding = b'\x00' * (orig_size - input_size)
-            patched_data.extend(padding)
-        elif input_size > orig_size:
-            print(f"Warning: Input file larger than original ({input_size} vs {orig_size} bytes), truncating")
-            patched_data = patched_data[:orig_size]
+        # Patch byte at 0x26
+        if PATCH_0x26:
+            patched_data[0x26] = orig_data[0x26]
+            print(f"Patched byte at 0x26: {patched_data[0x26]:02x}")
+
+        # Copy channel mask bytes (0x28-0x2B) only if SET_CHANNEL_MASK is True
+        channels, error = get_channel_count(orig_data)
+        if channels is None:
+            print(f"Error: {error}")
+            return False
+        channel_mask, error = get_channel_mask(orig_data)
+        if channel_mask is None:
+            print(f"Error: {error}")
+            return False
+        if SET_CHANNEL_MASK:
+            patched_data[0x28:0x2c] = struct.pack("<I", channel_mask)
+            print(f"Copied channel mask at 0x28-0x2B: {channel_mask:08x} (channels: {channels})")
+        else:
+            print(f"Skipped channel mask patching (0x28-0x2B), keeping original: {struct.unpack_from('<I', patched_data, 0x28)[0]:08x} (channels: {channels})")
+
+        # Add padding to match original size
+        if ADD_PADDING:
+            orig_size = len(orig_data)
+            input_size = len(patched_data)
+            if input_size < orig_size:
+                padding = b'\x00' * (orig_size - input_size)
+                patched_data.extend(padding)
+                print(f"Added {orig_size - input_size} bytes of zero padding")
+            elif input_size > orig_size:
+                print(f"Warning: Input file larger than original ({input_size} vs {orig_size} bytes), truncating")
+                patched_data = patched_data[:orig_size]
 
         # Write output file
         with open(output_wem, 'wb') as f_output:
             f_output.write(patched_data)
 
         print(f"Successfully patched: {output_wem}")
-        print(f"Bytes at 0x26, 0x28-0x2b: {patched_data[0x26:0x2c].hex()}")
         print(f"Output size: {len(patched_data)} bytes")
         return True
 
@@ -77,6 +122,7 @@ def batch_patch_wem(orig_dir, converted_dir, patched_dir):
     print(f"Original directory: {orig_dir}")
     print(f"Converted directory: {converted_dir}")
     print(f"Patched directory: {patched_dir}")
+    print(f"Configuration: PATCH_0x26={PATCH_0x26}, SET_CHANNEL_MASK={SET_CHANNEL_MASK}, ADD_PADDING={ADD_PADDING}")
     print()
 
     processed = 0
